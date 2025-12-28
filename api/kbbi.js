@@ -6,7 +6,7 @@ export default async function handler(req, res) {
 
     if (!q) {
       return res.status(400).json({
-        error: "Parameter ?q wajib diisi"
+        error: "Gunakan parameter ?q=kata"
       });
     }
 
@@ -19,7 +19,9 @@ export default async function handler(req, res) {
     });
 
     if (!response.ok) {
-      throw new Error("Gagal fetch KBBI");
+      return res.status(500).json({
+        error: "Gagal mengambil data KBBI"
+      });
     }
 
     const html = await response.text();
@@ -27,7 +29,7 @@ export default async function handler(req, res) {
 
     const arti = [];
 
-    $("ul li").each((_, el) => {
+    $(".container.body-content ul li").each((_, el) => {
       const text = $(el).text().replace(/\s+/g, " ").trim();
       if (text) arti.push(text);
     });
@@ -40,13 +42,14 @@ export default async function handler(req, res) {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       kata: q,
-      arti
+      arti,
+      sumber: "KBBI Kemendikbud"
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({
+    return res.status(500).json({
       error: "Internal Server Error",
       detail: err.message
     });
