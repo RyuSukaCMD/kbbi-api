@@ -1,5 +1,8 @@
 import { load } from "cheerio";
 
+const POLA_KELAS_KATA =
+  /^(n|v|a|adv|num|pron|prep|konj|p|kp|cak|ark|kl)\b/i;
+
 export default async function handler(req, res) {
   try {
     const { q } = req.query;
@@ -13,9 +16,7 @@ export default async function handler(req, res) {
     const url = `https://kbbi.kemdikbud.go.id/entri/${encodeURIComponent(q)}`;
 
     const response = await fetch(url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0"
-      }
+      headers: { "User-Agent": "Mozilla/5.0" }
     });
 
     if (!response.ok) {
@@ -29,9 +30,16 @@ export default async function handler(req, res) {
 
     const arti = [];
 
-    $(".container.body-content ul li").each((_, el) => {
-      const text = $(el).text().replace(/\s+/g, " ").trim();
-      if (text) arti.push(text);
+    $(".container.body-content li").each((_, el) => {
+      const text = $(el)
+        .text()
+        .replace(/\s+/g, " ")
+        .trim();
+
+      // HANYA ambil yang benar-benar arti
+      if (POLA_KELAS_KATA.test(text)) {
+        arti.push(text);
+      }
     });
 
     if (arti.length === 0) {
