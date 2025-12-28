@@ -1,9 +1,9 @@
 import fetch from "node-fetch";
-import cheerio from "cheerio";
+import { load } from "cheerio";
 
 export default async function handler(req, res) {
   try {
-    const q = req.query.q;
+    const { q } = req.query;
 
     if (!q) {
       return res.status(400).json({
@@ -21,12 +21,12 @@ export default async function handler(req, res) {
     });
 
     const html = await response.text();
-    const $ = cheerio.load(html);
+    const $ = load(html);
 
     const arti = [];
 
     $("ul li").each((_, el) => {
-      const text = $(el).text().trim();
+      const text = $(el).text().replace(/\s+/g, " ").trim();
       if (text) arti.push(text);
     });
 
@@ -45,7 +45,7 @@ export default async function handler(req, res) {
   } catch (err) {
     console.error(err);
     res.status(500).json({
-      error: "Server error",
+      error: "Internal Server Error",
       detail: err.message
     });
   }
