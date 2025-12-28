@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import { load } from "cheerio";
 
 export default async function handler(req, res) {
@@ -15,10 +14,13 @@ export default async function handler(req, res) {
 
     const response = await fetch(url, {
       headers: {
-        "User-Agent":
-          "Mozilla/5.0 (compatible; KBBIScraper/1.0)"
+        "User-Agent": "Mozilla/5.0"
       }
     });
+
+    if (!response.ok) {
+      throw new Error("Gagal fetch KBBI");
+    }
 
     const html = await response.text();
     const $ = load(html);
